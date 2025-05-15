@@ -40,7 +40,7 @@ public class ApplicationController {
 	            );
 	        }
 			ApplicationEntity application = objectMapper.treeToValue(applicationNode, ApplicationEntity.class);
-			logger.info(application.toString());
+			logger.info("Application deserialized!");
 			ObjectNode response = objectMapper.createObjectNode();
 			response.set("Application", objectMapper.valueToTree(application));
 			return ResponseEntity.ok(response);

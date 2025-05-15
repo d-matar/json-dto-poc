@@ -27,8 +27,8 @@ public class JacksonConfig {
 				 * 
 				 */
 				private static final long serialVersionUID = 1393288280652951222L;
-
 			{
+				//config deserializer/serializer for our entities 
 	            addDeserializer(ApplicationEntity.class, new DynamicDeserializer<>(
 	                ApplicationEntity.class, fieldMappingLoader.getFieldMappingFor(ApplicationEntity.class), fieldMappingLoader
 	            ));
@@ -49,6 +49,7 @@ public class JacksonConfig {
 	            addSerializer(PersonEntity.class, new DynamicSerializer<>(
 	            		PersonEntity.class, fieldMappingLoader.getFieldMappingFor(PersonEntity.class), fieldMappingLoader
 	            ));
+	            //TODO: config custom deserializer for entities under a package to avoid config for each model
 	        }});
 	    };
 	}

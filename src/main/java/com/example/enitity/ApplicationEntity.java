@@ -17,15 +17,11 @@ import lombok.Setter;
 @JsonIgnoreProperties
 //@Cacheable
 public class ApplicationEntity {
-//    @Id
-//    @GeneratedValue
     private Long id;
 
     private String submissionDate;
     
     private HouseholdEntity houseHold;
 
-    // Getters, Setters
-    
       	
 }

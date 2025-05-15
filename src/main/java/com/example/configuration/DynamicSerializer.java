@@ -69,6 +69,7 @@ public class DynamicSerializer<T> extends JsonSerializer<T> {
 				continue;
 
 			if (genericType != null && genericType instanceof ParameterizedType) {
+				//custom serialization for parameterized objects
 				Class<?> elementType = null;
 				Type[] typeArgs = ((ParameterizedType) genericType).getActualTypeArguments();
 				if (typeArgs.length > 0 && typeArgs[0] instanceof Class) {
@@ -96,9 +97,11 @@ public class DynamicSerializer<T> extends JsonSerializer<T> {
 				Map<String, String> nestedFieldMap = fieldMappingLoader.getFieldMappingFor(fieldType);
 
 				if (nestedFieldMap != null && !nestedFieldMap.isEmpty()) {
+					//custom serialization for nested objects
 					JsonNode javaNode = intialMapper.valueToTree(fieldValue);
 					remappedNode.set(jsonFieldName, javaNode);
 				} else {
+					//custom serialization for simple objects 
 					JsonNode javaNode = mapper.valueToTree(fieldValue);
 					remappedNode.set(jsonFieldName, javaNode);
 				}
