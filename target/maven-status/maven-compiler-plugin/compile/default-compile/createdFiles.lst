@@ -1,0 +1,14 @@
+com\example\enitity\ApplicationEntity$ApplicationEntityBuilder.class
+com\example\controller\JsonMappingConfiguration.class
+com\example\repository\ApplicationRepository.class
+com\example\configuration\FieldMappingLoader$1.class
+com\example\enitity\HouseholdEntity.class
+com\example\configuration\JacksonConfig$1.class
+com\example\application\JsonToPocApplication.class
+com\example\configuration\JacksonConfig.class
+com\example\configuration\DynamicDeserializer.class
+com\example\enitity\HouseholdEntity$HouseholdEntityBuilder.class
+com\example\configuration\FieldMappingLoader.class
+com\example\enitity\ApplicationEntity.class
+com\example\service\ApplicationService.class
+com\example\controller\ApplicationController.class

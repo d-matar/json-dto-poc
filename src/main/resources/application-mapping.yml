@@ -1,0 +1,14 @@
+ApplicationEntity:
+  app_id: id
+  sub_date: submissionDate
+  house_hold: houseHold
+
+HouseholdEntity:
+  id: id
+  landline_number: landlineNumber
+  domestic_workers_number: domesticWorkersNumber
+  persons: persons
+
+PersonEntity:
+  id: id
+  person_name: name
