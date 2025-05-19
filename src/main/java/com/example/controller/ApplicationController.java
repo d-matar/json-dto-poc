@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.enitity.ApplicationEntity;
+import com.example.dto.UsrHouseHoldDTO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -29,28 +29,23 @@ public class ApplicationController {
 	}
 
 	@PostMapping
-	public ResponseEntity<JsonNode> receiveApplication(@RequestBody JsonNode rawJson) {    
+	public ResponseEntity<JsonNode> receiveApplication(@RequestBody JsonNode rawJson) {
 		try {
-			
-			JsonNode applicationNode = rawJson.get("Application");
-			
-	        if (applicationNode == null) {
-	            return ResponseEntity.badRequest().body(
-	                objectMapper.createObjectNode().put("error", "Missing 'Application' root element")
-	            );
-	        }
-			ApplicationEntity application = objectMapper.treeToValue(applicationNode, ApplicationEntity.class);
+
+			if (rawJson == null) {
+				return ResponseEntity.badRequest()
+						.body(objectMapper.createObjectNode().put("error", "Missing 'Application' root element"));
+			}
+			UsrHouseHoldDTO houseHold = objectMapper.treeToValue(rawJson, UsrHouseHoldDTO.class);
 			logger.info("Application deserialized!");
-			ObjectNode response = objectMapper.createObjectNode();
-			response.set("Application", objectMapper.valueToTree(application));
+			ObjectNode response = objectMapper.valueToTree(houseHold);
 			return ResponseEntity.ok(response);
 
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 			e.printStackTrace();
 			return ResponseEntity.badRequest().body(objectMapper.createObjectNode()
-		            .put("error", "Deserialization failed")
-		            .put("message", e.getMessage()));		
-			}
+					.put("error", "Deserialization failed").put("message", e.getMessage()));
+		}
 	}
 }

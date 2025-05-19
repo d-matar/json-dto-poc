@@ -20,18 +20,17 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 public class DynamicDeserializer<T> extends StdDeserializer<T> {
-    
+
     private static final long serialVersionUID = -384344171889402531L;
-    
+
     private final Class<T> targetClass;
     private final Map<String, String> fieldMap;
-    
-    private FieldMappingLoader fieldMappingLoader;
-    
-	private static final Logger logger = LoggerFactory.getLogger(DynamicDeserializer.class);
+    private final FieldMappingLoader fieldMappingLoader;
 
+    private static final Logger logger = LoggerFactory.getLogger(DynamicDeserializer.class);
 
     public DynamicDeserializer(Class<T> targetClass, Map<String, String> fieldMap, FieldMappingLoader fieldMappingLoader) {
         super(targetClass);
@@ -39,102 +38,102 @@ public class DynamicDeserializer<T> extends StdDeserializer<T> {
         this.fieldMap = fieldMap;
         this.fieldMappingLoader = fieldMappingLoader;
     }
-   
+
     @Override
     public T deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         try {
             ObjectNode remappedNode = JsonNodeFactory.instance.objectNode();
-            ObjectMapper defaulatMapper = new ObjectMapper();
+
+            // Mapper for default/simple types (e.g., strings, numbers, dates)
+            ObjectMapper defaultMapper = new ObjectMapper();
+            defaultMapper.registerModule(new JavaTimeModule());
+            // TODO: Optionally register additional modules (Jdk8Module, ParameterNamesModule) if needed
+
+            // Custom mapper (with dynamic serializers) from Jackson context
             ObjectMapper customMapper = (ObjectMapper) p.getCodec();
 
-
-            // Ensure we're at the start of an object
+            // Ensure JSON object starts correctly
             if (p.currentToken() != JsonToken.START_OBJECT) {
                 p.nextToken();
                 if (p.currentToken() != JsonToken.START_OBJECT) {
-                	throw JsonMappingException.from(p, "Expected START_OBJECT token");
+                    throw JsonMappingException.from(p, "Expected START_OBJECT token");
                 }
             }
-            
+
+            // Iterate over all fields in the incoming JSON
             while (p.nextToken() != JsonToken.END_OBJECT) {
                 String fieldName = p.currentName();
-                p.nextToken(); 
-                
-                // Get the mapped field name
+                p.nextToken();
+
+                // Map incoming field name to corresponding Java field name
                 String javaFieldName = fieldMap.get(fieldName);
-				if (javaFieldName != null) {
-					
-					Map<String, String> fieldMapping = new HashMap<>();
-					JsonNode valueNode = p.readValueAsTree();
-					Class<?> fieldType = null;
-					Type genericType = null;
-					Class<?> elementType = null;
-					try {
-						Field declaredField = targetClass.getDeclaredField(javaFieldName);
-						genericType = declaredField.getGenericType();
-						fieldType = declaredField.getType();
+                if (javaFieldName != null) {
+                    JsonNode valueNode = p.readValueAsTree();
+                    Map<String, String> nestedFieldMapping = new HashMap<>();
 
-					} catch (Exception e) {
-						logger.error(e.getMessage(),e);
-					}
+                    Class<?> fieldType = null;
+                    Type genericType = null;
+                    Class<?> elementType = null;
 
-					if (genericType != null && genericType instanceof ParameterizedType) {
-						//handle custom deserialization for parameterized parameters
-						Type[] typeArgs = ((ParameterizedType) genericType).getActualTypeArguments();
-						if (typeArgs.length > 0 && typeArgs[0] instanceof Class) {
-							elementType = (Class<?>) typeArgs[0];
-						}
-							fieldMapping = fieldMappingLoader.getFieldMappingFor(elementType);
+                    try {
+                        Field declaredField = targetClass.getDeclaredField(javaFieldName);
+                        genericType = declaredField.getGenericType();
+                        fieldType = declaredField.getType();
+                    } catch (Exception e) {
+                        logger.error("Error accessing field: {}", javaFieldName, e);
+                    }
 
-							ArrayNode remappedArray = JsonNodeFactory.instance.arrayNode();
+                    if (genericType instanceof ParameterizedType) {
+                        // Handle deserialization of parameterized types (e.g., List<T>, Set<T>)
+                        Type[] typeArgs = ((ParameterizedType) genericType).getActualTypeArguments();
+                        if (typeArgs.length > 0 && typeArgs[0] instanceof Class<?>) {
+                            elementType = (Class<?>) typeArgs[0];
+                        }
 
-							for (JsonNode element : valueNode) {
-								JsonNode elementNode = defaulatMapper.valueToTree(element);
-								if (fieldMapping != null && !fieldMapping.isEmpty()) {
+                        nestedFieldMapping = fieldMappingLoader.getFieldMappingFor(elementType);
+                        ArrayNode remappedArray = JsonNodeFactory.instance.arrayNode();
 
-									Object mappedObj = customMapper.treeToValue(elementNode, elementType);
-									JsonNode nestedNode = defaulatMapper.valueToTree(mappedObj);
-									remappedArray.add(nestedNode);
-								} else {
-									remappedArray.add(elementNode);
-								}
+                        for (JsonNode element : valueNode) {
+                            JsonNode elementNode = defaultMapper.valueToTree(element);
 
-							}
-							remappedNode.set(javaFieldName, remappedArray);
-					}
+                            if (nestedFieldMapping != null && !nestedFieldMapping.isEmpty()) {
+                                Object mappedObj = customMapper.treeToValue(elementNode, elementType);
+                                JsonNode nestedNode = defaultMapper.valueToTree(mappedObj);
+                                remappedArray.add(nestedNode);
+                            } else {
+                                remappedArray.add(elementNode);
+                            }
+                        }
 
-					else {
-						System.out.println("field type " + fieldType);
-						fieldMapping = fieldMappingLoader.getFieldMappingFor(fieldType);
-						if (fieldMapping != null && !fieldMapping.isEmpty()) {
-							
-							//handle nested objects custom deserialization
-							Object nestedObj = customMapper.treeToValue(valueNode, fieldType);
+                        remappedNode.set(javaFieldName, remappedArray);
+                    } else {
+                        // Handle single (non-collection) fields
+                        nestedFieldMapping = fieldMappingLoader.getFieldMappingFor(fieldType);
 
-							JsonNode nestedNode = defaulatMapper.valueToTree(nestedObj);
-							remappedNode.set(javaFieldName, nestedNode);
-
-						}
-
-						else {
-							remappedNode.set(javaFieldName, valueNode);
-						}
-					}
-				} else {
-                    // Skip this field if it doesn't have a mapping
+                        if (nestedFieldMapping != null && !nestedFieldMapping.isEmpty()) {
+                            // Custom-mapped nested object
+                            Object nestedObj = customMapper.treeToValue(valueNode, fieldType);
+                            JsonNode nestedNode = defaultMapper.valueToTree(nestedObj);
+                            remappedNode.set(javaFieldName, nestedNode);
+                        } else {
+                            // Simple object
+                            remappedNode.set(javaFieldName, valueNode);
+                        }
+                    }
+                } else {
+                    // Skip unmapped fields
                     p.skipChildren();
                 }
             }
-            
-            // Use default deserializer to avoid infinite recursion 
+
+            // Deserialize the remapped node into the target Java object using the default mapper
             @SuppressWarnings("unchecked")
-            T result = (T) defaulatMapper.treeToValue(remappedNode, targetClass);
-            
+            T result = (T) defaultMapper.treeToValue(remappedNode, targetClass);
             return result;
+
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Deserialization failed for class {}: {}", targetClass.getSimpleName(), e.getMessage(), e);
             throw e;
         }
     }
-
 }

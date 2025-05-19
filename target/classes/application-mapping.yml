@@ -12,3 +12,37 @@ HouseholdEntity:
 PersonEntity:
   id: id
   person_name: name
+
+UsrHouseHoldDTO:
+  version: version
+  caseNumber: caseNumber
+  address: address
+  persons: persons
+  houseHoldExt: houseHoldExt
+
+UsrHouseHoldAddressDTO:
+  mouhafazaId: mouhafazaId
+  kadaaId: kadaaId
+  localityId: localityId
+  town: town
+  street: street
+  ownership: ownership
+  floor: floor
+  apartment: apartment
+  nearestLocation: nearestLocation
+  mobileNumber: mobileNumber
+
+UsrPersonDTO :
+  firstName: firstName
+  lastName: lastName
+  dateOfBirth: dateOfBirth
+  genderId: genderId
+  personExt: personExt
+
+UsrPersonExtDTO:
+  surveyType: surveyType
+  extendedAttributes: extendedAttributes
+
+UsrHouseHoldExtDTO:
+  surveyType: surveyType
+  extendedAttributes: extendedAttributes

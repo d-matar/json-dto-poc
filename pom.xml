@@ -65,41 +65,6 @@
         <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
 
-    <!-- Spring Boot Test for testing -->
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-test</artifactId>
-        <scope>test</scope>
-    </dependency>
-
-    <!-- Apache Commons Lang -->
-    <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-    </dependency>
-
-    <!-- Javax Mail for sending emails -->
-    <dependency>
-        <groupId>javax.mail</groupId>
-        <artifactId>mail</artifactId>
-        <version>1.4.7</version>
-    </dependency>
-
-    <!-- Javax Activation -->
-    <dependency>
-        <groupId>javax.activation</groupId>
-        <artifactId>activation</artifactId>
-        <version>1.1.1</version>
-        <scope>runtime</scope>
-    </dependency>
-    
-    <!-- Hazelcast Hibernate -->
-    <dependency>
-        <groupId>com.hazelcast</groupId>
-        <artifactId>hazelcast-hibernate53</artifactId>
-        <version>2.2.0</version>
-    </dependency>
-    
 </dependencies>
 
 	<build>
