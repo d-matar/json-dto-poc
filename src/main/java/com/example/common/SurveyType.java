@@ -4,6 +4,9 @@ import java.util.stream.Stream;
 
 import javax.persistence.Cacheable;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 
@@ -23,6 +26,13 @@ import lombok.Setter;
 public class SurveyType extends BaseLookup {
  
     private Boolean onboardingEnabled;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    private SurveyType parentSurvey;
+    
+    private Integer sampleDefaultPercentage;
+    
+    private Long dynaformLayoutId;
     
     public enum SURVEY_TYPE implements ILookupType<SURVEY_TYPE> {
       ESSN_SURVEY("ESSN_SURVEY"),NPTP_SURVEY("NPTP_SURVEY"), IDP_SURVEY("IDP_SURVEY"), AID_CARD_SURVEY("AID_CARD_SURVEY") , RECERTIFICATION_SURVEY("RECERTIFICATION_SURVEY");

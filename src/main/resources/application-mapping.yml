@@ -16,9 +16,10 @@ PersonEntity:
 UsrHouseHoldDTO:
   version: version
   caseNumber: caseNumber
-  address: address
+  specific.address: address
+  example: address.example
   persons: persons
-  houseHoldExt: houseHoldExt
+  "*": houseHoldExt.extendedAttributes
 
 UsrHouseHoldAddressDTO:
   mouhafazaId: mouhafazaId
@@ -32,17 +33,10 @@ UsrHouseHoldAddressDTO:
   nearestLocation: nearestLocation
   mobileNumber: mobileNumber
 
-UsrPersonDTO :
+UsrPersonDTO:
   firstName: firstName
   lastName: lastName
   dateOfBirth: dateOfBirth
   genderId: genderId
-  personExt: personExt
-
-UsrPersonExtDTO:
-  surveyType: surveyType
-  extendedAttributes: extendedAttributes
-
-UsrHouseHoldExtDTO:
-  surveyType: surveyType
-  extendedAttributes: extendedAttributes
+  personal.weight: weight
+  "*": personExt.extendedAttributes

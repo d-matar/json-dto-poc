@@ -18,4 +18,5 @@ public class UsrHouseHoldAddressDTO {
     private String apartment;
     private String nearestLocation;
     private String mobileNumber;
+    private String example;
 }

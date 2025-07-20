@@ -22,4 +22,5 @@ public class UsrPersonDTO {
     private LocalDate dateOfBirth;
     private Long genderId;
     private UsrPersonExtDTO personExt;
+    private String weight;
 }
